@@ -14,6 +14,10 @@
 !public/**
 !index.html
 
+# [+]: Doc files
+!docs/
+!docs/**
+
 # [+]: Config files
 !.editorconfig
 
