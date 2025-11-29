@@ -112,6 +112,10 @@ body {
   background-color: var(--c-base);
 
   font-family: var(--ff-sans-serif);
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
 }
 
 main {

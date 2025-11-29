@@ -39,11 +39,11 @@
   \*--------------------------------------------------------------------------*/
 
   let objects = []; // { position: number, weight: number, color: string }
+  let nextWeight = getRandomWeight();
+  let nextColor = getRandomColor();
 
   let isPaused = false;
 
-  let nextWeight = getRandomWeight();
-  let nextColor = getRandomColor();
   let currentAngle = 0;
   let lastTorques = { left: 0, right: 0 };
 
@@ -170,7 +170,7 @@
       pauseButton.classList.add("resumed");
 
       animate();
-      
+
       addLogEntry("Resumed simulation");
     }
   });
