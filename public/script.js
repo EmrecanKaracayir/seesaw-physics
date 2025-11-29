@@ -174,8 +174,7 @@
 
     const mainStyles = getComputedStyle(mainContainer);
     const mainPadding =
-      parseFloat(mainStyles.paddingLeft) +
-      parseFloat(mainStyles.paddingRight);
+      parseFloat(mainStyles.paddingLeft) + parseFloat(mainStyles.paddingRight);
 
     const availableWidth = window.innerWidth - bodyPadding - mainPadding;
 
@@ -298,15 +297,16 @@
     previewEl.style.display = "none";
   }
 
-  function showPreview(parallelDistance, halfW) {
+  function showPreview(parallelDistance, pivotX) {
     if (!previewEl) {
       console.error("No preview element");
       return;
     }
 
-    const normalizedPos = parallelDistance / halfW;
+    const normalizedPos = parallelDistance / pivotX;
+
     const clampedPos = Math.max(-1, Math.min(1, normalizedPos));
-    const position = halfW + clampedPos * halfW;
+    const position = PLANK_LENGTH / 2 + clampedPos * (PLANK_LENGTH / 2);
 
     previewEl.style.display = "block";
     previewEl.style.left = `${position}px`;
