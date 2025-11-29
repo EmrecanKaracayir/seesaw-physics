@@ -22,26 +22,6 @@ until the system finds a new equilibrium.
 - **Reset** to clear every object, generate a new next weight, and zero the
   seesaw.
 
-## Run Locally
-
-1. Clone the repo and move into it.
-   ```bash
-   git clone https://github.com/emrecankaracayir/seesaw-physics.git
-   cd seesaw-physics
-   ```
-2. Serve the directory with any static server (or just open `index.html`). A
-   couple of simple options:
-   ```bash
-   # Using npm's serve (install globally once)
-   npm install -g serve
-   serve .
-
-   # Or with Python 3's built-in HTTP server
-   python3 -m http.server 5173
-   ```
-3. Visit the printed URL in a modern desktop browser. Everything runs locally
-   without additional dependencies.
-
 ## Project Layout
 
 - `index.html` – Shell page that wires up the UI components
@@ -60,6 +40,8 @@ until the system finds a new equilibrium.
   so the movement feels physical instead of jumpy.
 - State is persisted in `localStorage` (`seesaw-physics-state-v1`) so refreshing
   the page reloads your stacked objects along with the upcoming weight/color.
+
+## Development
 
 ## License
 

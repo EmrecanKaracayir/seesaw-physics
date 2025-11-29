@@ -30,6 +30,7 @@
   const rightWeightEl = document.getElementById("right-weight");
   const nextWeightEl = document.getElementById("next-weight");
   const angleEl = document.getElementById("angle");
+  const pauseButton = document.getElementById("pause-button");
   const resetButton = document.getElementById("reset-button");
   const logsEl = document.getElementById("logs");
 
@@ -38,9 +39,12 @@
   \*--------------------------------------------------------------------------*/
 
   let objects = []; // { position: number, weight: number, color: string }
-  let currentAngle = 0;
+
+  let isPaused = false;
+
   let nextWeight = getRandomWeight();
   let nextColor = getRandomColor();
+  let currentAngle = 0;
   let lastTorques = { left: 0, right: 0 };
 
   let previewEl = null;
@@ -152,6 +156,25 @@
     updatePreview();
   });
 
+  pauseButton.addEventListener("click", () => {
+    isPaused = !isPaused;
+    if (isPaused) {
+      pauseButton.textContent = "Resume";
+      pauseButton.classList.remove("resumed");
+      pauseButton.classList.add("paused");
+
+      addLogEntry("Paused simulation");
+    } else {
+      pauseButton.textContent = "Pause";
+      pauseButton.classList.remove("paused");
+      pauseButton.classList.add("resumed");
+
+      animate();
+      
+      addLogEntry("Resumed simulation");
+    }
+  });
+
   resetButton.addEventListener("click", () => {
     objects = [];
     targetAngle = 0;
@@ -192,18 +215,20 @@
   }
 
   function animate() {
-    const stiffness = 0.08;
-    const angleDiff = targetAngle - currentAngle;
-    currentAngle += angleDiff * stiffness;
+    if (!isPaused) {
+      const stiffness = 0.08;
+      const angleDiff = targetAngle - currentAngle;
+      currentAngle += angleDiff * stiffness;
 
-    if (Math.abs(angleDiff) < 0.01) {
-      currentAngle = targetAngle;
+      if (Math.abs(angleDiff) < 0.01) {
+        currentAngle = targetAngle;
+      }
+
+      plankEl.style.transform = `rotate(${currentAngle}deg)`;
+      updateAngleLabel();
+
+      requestAnimationFrame(animate);
     }
-
-    plankEl.style.transform = `rotate(${currentAngle}deg)`;
-    updateAngleLabel();
-
-    requestAnimationFrame(animate);
   }
 
   /*--------------------------------------------------------------------------*\
