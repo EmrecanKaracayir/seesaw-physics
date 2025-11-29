@@ -34,11 +34,48 @@
   \*--------------------------------------------------------------------------*/
 
   function saveState() {
-    console.error("Not implemented!");
+    try {
+      const data = { objects, nextWeight, nextColor };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn("Could not save state:", e);
+    }
   }
 
   function loadState() {
-    console.error("Not implemented!");
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.objects)) return;
+
+      objects = parsed.objects
+        .filter(
+          (o) =>
+            typeof o.position === "number" &&
+            typeof o.weight === "number" &&
+            isFinite(o.position) &&
+            isFinite(o.weight)
+        )
+        .map((o) => ({
+          position: Math.max(-PLANK_LENGTH, Math.min(PLANK_LENGTH, o.position)),
+          weight: Math.max(1, Math.min(10, Math.round(o.weight))),
+          color: typeof o.color === "string" ? o.color : getRandomColor(),
+        }));
+
+      if (
+        typeof parsed.nextWeight === "number" &&
+        parsed.nextWeight >= 1 &&
+        parsed.nextWeight <= 10
+      ) {
+        nextWeight = parsed.nextWeight;
+      }
+      if (typeof parsed.nextColor === "string") {
+        nextColor = parsed.nextColor;
+      }
+    } catch (e) {
+      console.warn("Could not load state:", e);
+    }
   }
 
   /*--------------------------------------------------------------------------*\
@@ -243,17 +280,17 @@
     previewEl.style.display = "none";
   }
 
-  function showPreview(parallelDistance, pivotX) {
+  function showPreview(parallelDistance, halfW) {
     if (!previewEl) {
       console.error("No preview element");
       return;
     }
 
-    const normalizedPos = parallelDistance / pivotX;
+    const normalizedPos = parallelDistance / halfW;
     const clampedPos = Math.max(-1, Math.min(1, normalizedPos));
-    const position = pivotX + clampedPos * pivotX;
+    const position = halfW + clampedPos * halfW;
 
-    previewEl.style.display = "flex";
+    previewEl.style.display = "block";
     previewEl.style.left = `${position}px`;
     previewEl.style.backgroundColor = nextColor;
     previewEl.querySelector(".object-label").textContent = `${nextWeight} kg`;
