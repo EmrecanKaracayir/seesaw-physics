@@ -371,10 +371,16 @@ h2 {
   pointer-events: none;
 }
 
+.object-real {
+  z-index: 1;
+}
+
 .object-preview {
   opacity: 0.5;
 
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+
+  z-index: 2;
 }
 
 .object-label {
