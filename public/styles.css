@@ -11,6 +11,7 @@
   --c-flyout-hover: rgb(60, 60, 60);
 
   --c-border: rgba(250, 250, 250, 0.1);
+  --c-border-alt: rgba(0, 0, 0, 0.1);
 
   --c-text-primary: rgb(250, 250, 250);
   --c-text-secondary: rgba(250, 250, 250, 0.5);
@@ -197,7 +198,7 @@ button {
   padding-inline: var(--d-20);
   padding-block: var(--d-05);
 
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--c-border-alt);
   border-radius: var(--d-10);
 
   color: rgb(0, 0, 0);
@@ -320,6 +321,76 @@ button {
   transform: translateX(-50%);
 
   filter: drop-shadow(var(--s-sm));
+}
+
+.scale-container {
+  position: absolute;
+  left: 50%;
+  bottom: 105px;
+
+  width: calc(var(--plank-length) + var(--d-25));
+  height: 2px;
+
+  background-color: var(--c-flyout);
+
+  border-radius: var(--d-05);
+
+  transform: translateX(-50%);
+}
+
+.scale-marking {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--d-05);
+
+  position: absolute;
+}
+
+.scale-marking.left-100 {
+  left: 0;
+  top: 0;
+}
+
+.scale-marking.left-50 {
+  left: 25%;
+  top: 0;
+
+  transform: translateX(-50%);
+}
+
+.scale-marking.center {
+  left: 50%;
+  top: 0;
+
+  transform: translateX(-50%);
+}
+
+.scale-marking.right-50 {
+  left: 75%;
+  top: 0;
+
+  transform: translateX(-50%);
+}
+
+.scale-marking.right-100 {
+  right: 0;
+  top: 0;
+}
+
+.scale-tick {
+  width: 0;
+  height: 0;
+
+  border-inline: var(--d-05) solid transparent;
+  border-block-start: var(--d-10) solid var(--c-flyout);
+}
+
+.scale-label {
+  color: var(--c-flyout-hover);
+
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-10);
 }
 
 #plank-container {
