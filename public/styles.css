@@ -20,6 +20,7 @@
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
 
   /* Font Sizes */
+  --fs-10: 0.625rem;
   --fs-12: 0.75rem;
   --fs-14: 0.875rem;
   --fs-16: 1rem;
@@ -52,7 +53,7 @@
 }
 
 /*----------------------------------------------------------------------------*\
-*| Globals                                                                    |*
+*| Global Styles                                                              |*
 \*----------------------------------------------------------------------------*/
 
 *,
@@ -90,7 +91,7 @@ html {
 }
 
 /*----------------------------------------------------------------------------*\
-*| Styles                                                                     |*
+*| Static Element Styles                                                      |*
 \*----------------------------------------------------------------------------*/
 
 body {
@@ -278,7 +279,7 @@ button:active {
   filter: drop-shadow(var(--s-sm));
 }
 
-.plank-container {
+#plank-container {
   position: absolute;
   left: 50%;
   bottom: 50%;
@@ -286,10 +287,10 @@ button:active {
   width: 400px;
   height: 40px;
 
-  transform: translateX(-50%) translateY(50%);
+  transform: translate(-50%, 50%);
 }
 
-.plank {
+#plank {
   position: absolute;
   left: 0;
   top: 50%;
@@ -342,4 +343,50 @@ h2 {
     padding-inline: var(--d-15);
     padding-block: var(--d-10);
   }
+}
+
+/*----------------------------------------------------------------------------*\
+*| Dynamic Element Styles                                                     |*
+\*----------------------------------------------------------------------------*/
+
+.object {
+  position: absolute;
+  bottom: 50%;
+
+  width: var(--d-25);
+  height: var(--d-25);
+
+  border-radius: var(--d-25);
+
+  box-shadow: var(--s-sm);
+
+  transform: translate(-50%, 50%);
+
+  pointer-events: none;
+}
+
+.object-preview {
+  opacity: 0.5;
+
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.object-label {
+  position: absolute;
+  top: -25px;
+  left: 50%;
+
+  padding-inline: 5px;
+  padding-block: 2px;
+
+  color: var(--c-text-primary);
+  background-color: var(--c-flyout);
+
+  border: 1px solid var(--c-border);
+  border-radius: var(--d-05);
+
+  font-size: var(--fs-10);
+  white-space: nowrap;
+
+  transform: translateX(-50%);
 }
