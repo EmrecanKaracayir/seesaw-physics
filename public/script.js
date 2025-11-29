@@ -2,10 +2,25 @@
   /*--------------------------------------------------------------------------*\
   |* Constants                                                                *|
   \*--------------------------------------------------------------------------*/
-
-  const PLANK_LENGTH = 400;
-  const MAX_ANGLE = 30; // Degrees
   const STORAGE_KEY = "seesaw-physics-state-v1";
+
+  const MAX_ANGLE = 30; // Degrees
+  const PLANK_LENGTH = parseInt(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--plank-length")
+      .trim()
+  );
+  const MAIN_MAX_WIDTH = parseInt(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--main-max-width")
+      .trim()
+  );
+  const MAIN_INITIAL_PADDING = parseInt(
+    getComputedStyle(document.documentElement)
+      .getPropertyValue("--main-initial-padding")
+      .trim()
+  );
+  const SEESAW_BASE_WIDTH = MAIN_MAX_WIDTH - MAIN_INITIAL_PADDING * 2;
 
   const mainContainer = document.querySelector("main");
   const plankContainer = document.getElementById("plank-container");
@@ -153,15 +168,18 @@
   \*--------------------------------------------------------------------------*/
 
   function computeScale() {
-    const baseWidth = 680;
+    const bodyStyles = getComputedStyle(document.body);
+    const bodyPadding =
+      parseFloat(bodyStyles.paddingLeft) + parseFloat(bodyStyles.paddingRight);
 
-    const containerStyles = getComputedStyle(mainContainer);
-    const availableWidth =
-      mainContainer.clientWidth -
-      parseFloat(containerStyles.paddingLeft) -
-      parseFloat(containerStyles.paddingRight);
+    const mainStyles = getComputedStyle(mainContainer);
+    const mainPadding =
+      parseFloat(mainStyles.paddingLeft) +
+      parseFloat(mainStyles.paddingRight);
 
-    let scale = Math.min(availableWidth / baseWidth, 1);
+    const availableWidth = window.innerWidth - bodyPadding - mainPadding;
+
+    let scale = Math.min(availableWidth / SEESAW_BASE_WIDTH, 1);
     document.documentElement.style.setProperty("--seesaw-scale", scale);
   }
 
