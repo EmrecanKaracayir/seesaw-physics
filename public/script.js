@@ -3,6 +3,8 @@
   |* Constants                                                                *|
   \*--------------------------------------------------------------------------*/
 
+  const PLANK_LENGTH = 400;
+  const MAX_ANGLE = 30; // Degrees
   const STORAGE_KEY = "seesaw-physics-state-v1";
 
   const mainContainer = document.querySelector("main");
@@ -13,14 +15,14 @@
   const nextWeightEl = document.getElementById("next-weight");
   const angleEl = document.getElementById("angle");
   const resetButton = document.getElementById("reset-button");
-  const logsElement = document.getElementById("logs");
+  const logsEl = document.getElementById("logs");
 
   /*--------------------------------------------------------------------------*\
   |* State                                                                    *|
   \*--------------------------------------------------------------------------*/
 
   let objects = []; // { position: number, weight: number, color: string }
-  let currentAngle = 0; // in degrees
+  let currentAngle = 0;
   let nextWeight = getRandomWeight();
   let nextColor = getRandomColor();
   let lastTorques = { left: 0, right: 0 };
@@ -28,19 +30,86 @@
   let previewEl = null;
 
   /*--------------------------------------------------------------------------*\
-  |* Utilities                                                                *|
+  |* Persistence                                                              *|
   \*--------------------------------------------------------------------------*/
 
-  function getRandomWeight() {
-    return Math.floor(Math.random() * 10) + 1;
+  function saveState() {
+    console.error("Not implemented!");
   }
 
-  function getRandomColor() {
-    const hue = Math.floor(Math.random() * 360);
-    const sat = 65 + Math.random() * 15;
-    const light = 55 + Math.random() * 10;
-    return `hsl(${hue}, ${sat}%, ${light}%)`;
+  function loadState() {
+    console.error("Not implemented!");
   }
+
+  /*--------------------------------------------------------------------------*\
+  |* Listeners                                                                *|
+  \*--------------------------------------------------------------------------*/
+
+  window.addEventListener("resize", computeScale);
+  computeScale();
+
+  plankContainer.addEventListener("mousemove", (e) => {
+    updatePreview(e.clientX, e.clientY);
+  });
+
+  plankContainer.addEventListener("mouseleave", () => {
+    hidePreview();
+  });
+
+  plankContainer.addEventListener("click", (e) => {
+    const { parallelDistance, perpendicularDistance, pivotX } =
+      getMousePlankProjection(e.clientX, e.clientY);
+
+    if (
+      Math.abs(parallelDistance) > pivotX ||
+      perpendicularDistance > plankEl.clientHeight
+    ) {
+      return;
+    }
+
+    const normalizedPos = parallelDistance / pivotX;
+    const physicsPos = Math.max(
+      -(PLANK_LENGTH / 2),
+      Math.min(PLANK_LENGTH / 2, normalizedPos * (PLANK_LENGTH / 2))
+    );
+
+    const weight = nextWeight;
+    const color = nextColor;
+
+    objects.push({ position: physicsPos, weight, color });
+
+    nextWeight = getRandomWeight();
+    nextColor = getRandomColor();
+    updateNextWeightLabel();
+
+    renderObjects(objects.length - 1);
+    calculatePhysics();
+    saveState();
+    playSound();
+
+    const side = physicsPos < 0 ? "L" : physicsPos > 0 ? "R" : "C";
+    addLogEntry(
+      `Drop w=${weight}kg @ ${physicsPos.toFixed(
+        0
+      )}px (${side}) | τL=${lastTorques.left.toFixed(
+        0
+      )}, τR=${lastTorques.right.toFixed(0)}, θ=${targetAngle.toFixed(1)}°`
+    );
+
+    updatePreview();
+  });
+
+  resetButton.addEventListener("click", () => {
+    objects = [];
+    targetAngle = 0;
+    renderObjects();
+    recalcPhysics();
+    nextWeight = getRandomWeight();
+    nextColor = getRandomColor();
+    updateNextWeightLabel();
+    saveState();
+    addLogEntry("Reset simulation");
+  });
 
   /*--------------------------------------------------------------------------*\
   |* UI Updates                                                               *|
@@ -57,6 +126,95 @@
 
     let scale = Math.min(availableWidth / baseWidth, 1);
     document.documentElement.style.setProperty("--seesaw-scale", scale);
+  }
+
+  function updateNextWeightLabel() {
+    nextWeightEl.textContent = `${nextWeight}`;
+  }
+
+  function updateAngleLabel() {
+    angleEl.textContent = currentAngle.toFixed(1);
+  }
+
+  function animate() {
+    const stiffness = 0.08;
+    const angleDiff = targetAngle - currentAngle;
+    currentAngle += angleDiff * stiffness;
+
+    if (Math.abs(angleDiff) < 0.01) {
+      currentAngle = targetAngle;
+    }
+
+    plankEl.style.transform = `rotate(${currentAngle}deg)`;
+    updateAngleLabel();
+
+    requestAnimationFrame(animate);
+  }
+
+  /*--------------------------------------------------------------------------*\
+  |* Rendering                                                                *|
+  \*--------------------------------------------------------------------------*/
+
+  function clearObjectElements() {
+    plankEl.querySelectorAll(".object-real").forEach((el) => el.remove());
+  }
+
+  function renderObjects(animateIndex = null) {
+    clearObjectElements();
+
+    const halfW = (plankContainer.clientWidth || PLANK_LENGTH) / 2;
+
+    objects.forEach((obj, index) => {
+      const objEl = document.createElement("div");
+      objEl.className = "object object-real";
+      if (index === animateIndex) {
+        objEl.classList.add("animate");
+      }
+      objEl.style.backgroundColor = obj.color;
+
+      const normalizedPos = obj.position / (PLANK_LENGTH / 2);
+      const clampedPos = Math.max(-1, Math.min(1, normalizedPos));
+      const position = halfW + clampedPos * halfW;
+      objEl.style.left = `${position}px`;
+
+      const label = document.createElement("span");
+      label.className = "object-label";
+      label.textContent = `${obj.weight} kg`;
+      objEl.appendChild(label);
+
+      plankEl.appendChild(objEl);
+    });
+  }
+
+  /*--------------------------------------------------------------------------*\
+  |* Sound                                                                    *|
+  \*--------------------------------------------------------------------------*/
+
+  let audioCtx = null;
+  function playSound() {
+    try {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        audioCtx = new AudioContext();
+      }
+      const ctx = audioCtx;
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(240, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.18);
+    } catch (e) {
+      // ignore
+    }
   }
 
   /*--------------------------------------------------------------------------*\
@@ -101,19 +259,31 @@
     previewEl.querySelector(".object-label").textContent = `${nextWeight} kg`;
   }
 
-  /*--------------------------------------------------------------------------*\
-  |* Listeners                                                                *|
-  \*--------------------------------------------------------------------------*/
-
-  window.addEventListener("resize", computeScale);
-  computeScale();
-
-  plankContainer.addEventListener("mousemove", (e) => {
+  function updatePreview(mouseX, mouseY) {
     ensurePreview();
 
+    const { parallelDistance, perpendicularDistance, pivotX } =
+      getMousePlankProjection(mouseX, mouseY);
+
+    if (
+      Math.abs(parallelDistance) > pivotX ||
+      perpendicularDistance > plankEl.clientHeight
+    ) {
+      hidePreview();
+      return;
+    }
+
+    showPreview(parallelDistance, pivotX);
+  }
+
+  /*--------------------------------------------------------------------------*\
+  |* Calculations                                                             *|
+  \*--------------------------------------------------------------------------*/
+
+  function getMousePlankProjection(mouseX, mouseY) {
     const localRect = plankContainer.getBoundingClientRect();
-    const localX = e.clientX - localRect.left;
-    const localY = e.clientY - localRect.top;
+    const localX = mouseX - localRect.left;
+    const localY = mouseY - localRect.top;
 
     const pivotX = localRect.width / 2;
     const pivotY = localRect.height / 2;
@@ -128,31 +298,61 @@
     const parallelDistance = vecX * uVecX + vecY * uVecY;
     const perpendicularDistance = Math.abs(vecX * uVecY - vecY * uVecX);
 
-    if (Math.abs(parallelDistance) > pivotX) {
-      hidePreview();
-      return;
+    return { parallelDistance, perpendicularDistance, pivotX, pivotY };
+  }
+
+  function calculatePhysics() {
+    let leftTorque = 0;
+    let rightTorque = 0;
+    let leftWeight = 0;
+    let rightWeight = 0;
+
+    for (const obj of objects) {
+      const distance = obj.position;
+      const weight = obj.weight;
+      if (distance < 0) {
+        leftTorque += Math.abs(distance) * weight;
+        leftWeight += weight;
+      } else if (distance > 0) {
+        rightTorque += distance * weight;
+        rightWeight += weight;
+      }
     }
 
-    const tolerance = 10;
-    if (perpendicularDistance > tolerance) {
-      hidePreview();
-      return;
-    }
+    lastTorques.left = leftTorque;
+    lastTorques.right = rightTorque;
 
-    showPreview(parallelDistance, pivotX);
-  });
+    leftWeightEl.textContent = leftWeight.toFixed(1).replace(/\.0$/, "");
+    rightWeightEl.textContent = rightWeight.toFixed(1).replace(/\.0$/, "");
 
-  plankContainer.addEventListener("mouseleave", () => {
-    hidePreview();
-  });
+    const diff = rightTorque - leftTorque;
+    const rawAngle = diff / 10;
+    targetAngle = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, rawAngle));
+  }
 
-  plankContainer.addEventListener("click", (e) => {
-    console.error("Not implemented!");
-  });
+  /*--------------------------------------------------------------------------*\
+  |* Utilities                                                                *|
+  \*--------------------------------------------------------------------------*/
 
-  resetButton.addEventListener("click", () => {
-    console.error("Not implemented!");
-  });
+  function getRandomWeight() {
+    return Math.floor(Math.random() * 10) + 1;
+  }
+
+  function getRandomColor() {
+    const hue = Math.floor(Math.random() * 360);
+    const sat = 65 + Math.random() * 15;
+    const light = 55 + Math.random() * 10;
+    return `hsl(${hue}, ${sat}%, ${light}%)`;
+  }
+
+  function addLogEntry(text) {
+    const entry = document.createElement("div");
+    entry.className = "log-entry";
+    const now = new Date();
+    const time = now.toLocaleTimeString("en-GB", { hour12: false });
+    entry.textContent = `[${time}] ${text}`;
+    logsEl.prepend(entry);
+  }
 
   /*--------------------------------------------------------------------------*\
   |* Initialization                                                           *|
@@ -160,11 +360,11 @@
 
   function init() {
     loadState();
-    prepareNextWeight();
+    updateNextWeightLabel();
     renderObjects();
-    recalculatePhysics();
-    updateUI();
-    addLogEntry();
+    calculatePhysics();
+    updateAngleLabel();
+    addLogEntry(`Loaded ${objects.length} object(s) from storage`);
     requestAnimationFrame(animate);
   }
 
