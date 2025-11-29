@@ -48,8 +48,8 @@
 
   /* Operationals */
   --max-width: 720px;
-  --area-scale: 1;
-  --area-height: 250px;
+  --seesaw-scale: 1;
+  --seesaw-height: 250px;
 }
 
 /*----------------------------------------------------------------------------*\
@@ -234,7 +234,7 @@ button:active {
   position: relative;
 
   max-width: calc(var(--max-width) - (var(--d-20) * 2));
-  height: calc(var(--area-height) * var(--area-scale));
+  height: calc(var(--seesaw-height) * var(--seesaw-scale));
 
   margin-inline: auto;
 }
@@ -245,9 +245,9 @@ button:active {
   left: 50%;
 
   width: calc(var(--max-width) - (var(--d-20) * 2));
-  height: var(--area-height);
+  height: var(--seesaw-height);
 
-  transform: translateX(-50%) scale(var(--area-scale));
+  transform: translateX(-50%) scale(var(--seesaw-scale));
   transform-origin: top center;
 }
 

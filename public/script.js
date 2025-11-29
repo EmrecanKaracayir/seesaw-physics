@@ -5,6 +5,7 @@
 
   const STORAGE_KEY = "seesaw-physics-state-v1";
 
+  const mainContainer = document.querySelector("main");
   const plankContainer = document.getElementById("plank-container");
   const plankEl = document.getElementById("plank");
   const leftWeightEl = document.getElementById("left-weight");
@@ -39,6 +40,23 @@
     const sat = 65 + Math.random() * 15;
     const light = 55 + Math.random() * 10;
     return `hsl(${hue}, ${sat}%, ${light}%)`;
+  }
+
+  /*--------------------------------------------------------------------------*\
+  |* UI Updates                                                               *|
+  \*--------------------------------------------------------------------------*/
+
+  function computeScale() {
+    const baseWidth = 680;
+
+    const containerStyles = getComputedStyle(mainContainer);
+    const availableWidth =
+      mainContainer.clientWidth -
+      parseFloat(containerStyles.paddingLeft) -
+      parseFloat(containerStyles.paddingRight);
+
+    let scale = Math.min(availableWidth / baseWidth, 1);
+    document.documentElement.style.setProperty("--seesaw-scale", scale);
   }
 
   /*--------------------------------------------------------------------------*\
@@ -84,8 +102,11 @@
   }
 
   /*--------------------------------------------------------------------------*\
-  |* Interactions                                                             *|
+  |* Listeners                                                                *|
   \*--------------------------------------------------------------------------*/
+
+  window.addEventListener("resize", computeScale);
+  computeScale();
 
   plankContainer.addEventListener("mousemove", (e) => {
     ensurePreview();
