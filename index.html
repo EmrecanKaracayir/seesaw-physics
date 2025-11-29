@@ -7,6 +7,47 @@
     <link rel="stylesheet" href="public/styles.css" />
   </head>
   <body>
+    <main>
+      <header>
+        <h1>Seesaw Physics</h1>
+        <div class="chip-group">
+          <div class="chip chip--weights">
+            <span class="chip-label">Weights</span>
+            <span class="chip-value">
+              L: <span id="left-weight">0</span>kg - R:
+              <span id="right-weight">0</span>kg
+            </span>
+          </div>
+          <div class="chip chip--next">
+            <span class="chip-label">Next</span>
+            <span class="chip-value"> <span id="next-weight">0</span>kg </span>
+          </div>
+          <div class="chip chip--angle">
+            <span class="chip-label">Angle</span>
+            <span class="chip-value"><span id="angle">0</span>°</span>
+          </div>
+        </div>
+        <button id="reset-button">Reset</button>
+      </header>
+      <p class="instructions">
+        Hover on the plank to preview where the next object will land, then
+        click to drop it. Each object has a known random weight and tilts the
+        seesaw based on torque.
+      </p>
+      <div class="seesaw-wrapper">
+        <section class="seesaw-container">
+          <div class="ground"></div>
+          <div class="pivot"></div>
+          <div class="plank-container">
+            <div class="plank"></div>
+          </div>
+        </section>
+      </div>
+      <section class="log-container">
+        <h2>Logs</h2>
+        <div id="logs"></div>
+      </section>
+    </main>
     <script src="public/script.js"></script>
   </body>
 </html>

@@ -1,2 +1,2 @@
 # Seesaw Physics
-Physics simulation of seesaw using vanilla JS
+Physics simulation of seesaw using vanilla web technologies.
