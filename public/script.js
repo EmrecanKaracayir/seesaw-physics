@@ -140,7 +140,7 @@
     objects = [];
     targetAngle = 0;
     renderObjects();
-    recalcPhysics();
+    calculatePhysics();
     nextWeight = getRandomWeight();
     nextColor = getRandomColor();
     updateNextWeightLabel();
